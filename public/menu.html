@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Menú del Restaurante</title>
+    <link rel="prefetch" href="URL_TAPAS_PDF">
+    <link rel="prefetch" href="URL_PLATOS_PDF">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:"Segoe UI",Roboto,sans-serif;overflow-x:hidden;background:#7FCCC7;color:#0D5E86;-webkit-text-size-adjust:100%}
+        .hero{height:100dvh;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:#7FCCC7}
+        .logo{max-width:250px;width:90%;height:auto;margin-bottom:3rem}
+        .hero-buttons{display:flex;flex-direction:column;gap:1.5rem;width:100%;max-width:460px;padding:0 1rem}
+        .btn{display:block;width:100%;min-height:48px;padding:0.75rem 1.5rem;border:none;border-radius:26px;font-size:1.35rem;font-weight:bold;text-decoration:none;text-align:center;background:#FFF;color:#0D5E86;transition:all 0.3s ease;touch-action:manipulation;cursor:pointer}
+        .btn:hover,.btn:active{background:#FF725E;color:#FFF}
+        .viewer{display:none;height:100dvh;height:100svh;flex-direction:column}
+        .viewer.active{display:flex}
+        .top-bar{height:58px;width:100%;background:linear-gradient(90deg,#0D5E86,#009FB0);display:flex;align-items:center;justify-content:center;gap:1rem;padding:0.5rem;position:sticky;top:0;z-index:100;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+        .bar-btn{padding:0.5rem 1.5rem;border:none;border-radius:20px;font-size:1rem;font-weight:bold;background:#FFF;color:#0D5E86;text-decoration:none;transition:all 0.3s ease;touch-action:manipulation;cursor:pointer;white-space:nowrap}
+        .bar-btn:hover,.bar-btn.active{background:#FF725E;color:#FFF}
+        #frameWrap{overflow:hidden;width:100dvw;height:calc(100dvh - 58px);height:calc(100svh - 58px)}
+        .pdf-frame{width:100%;height:100%;border:0}
+        @media(min-width:680px){
+            .hero-buttons,.top-bar{flex-direction:row;justify-content:center}
+            .hero-buttons{max-width:600px}
+            .btn{max-width:280px}
+        }
+        @media(max-width:320px){
+            .btn{font-size:1.2rem}
+            .bar-btn{font-size:0.9rem;padding:0.4rem 1rem}
+        }
+    </style>
+</head>
+<body>
+    <main class="hero" id="heroSection">
+        <img src="URL_LOGO" alt="Logo del Restaurante" class="logo">
+        <div class="hero-buttons">
+            <a href="?menu=tapas" class="btn" data-menu="tapas" role="button" aria-label="Ver carta de tapas">Carta de tapas</a>
+            <a href="?menu=platos" class="btn" data-menu="platos" role="button" aria-label="Ver carta de platos">Carta de platos</a>
+        </div>
+    </main>
+
+    <section class="viewer" id="viewerSection">
+        <nav class="top-bar">
+            <a href="?menu=tapas" class="bar-btn" data-menu="tapas" id="tapasBtn" role="button" aria-label="Ver carta de tapas">Tapas</a>
+            <a href="?menu=platos" class="bar-btn" data-menu="platos" id="platosBtn" role="button" aria-label="Ver carta de platos">Platos</a>
+        </nav>
+        <div id="frameWrap">
+            <iframe id="pdfFrame" class="pdf-frame" title="Menú del restaurante"></iframe>
+        </div>
+    </section>
+
+    <script>
+        (function(){
+            const hero=document.getElementById('heroSection');
+            const viewer=document.getElementById('viewerSection');
+            const frame=document.getElementById('pdfFrame');
+            const tapasBtn=document.getElementById('tapasBtn');
+            const platosBtn=document.getElementById('platosBtn');
+            
+            const pdfs={
+                tapas:'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent('URL_TAPAS_PDF') + '#zoom=page-width',
+                platos:'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent('URL_PLATOS_PDF') + '#zoom=page-width'
+            };
+            
+            function showMenu(type){
+                if(!pdfs[type])return;
+                hero.style.display='none';
+                viewer.classList.add('active');
+                frame.src=pdfs[type];
+                tapasBtn.classList.toggle('active',type==='tapas');
+                platosBtn.classList.toggle('active',type==='platos');
+                history.replaceState(null,'','?menu='+type);
+            }
+            
+            function handleClick(e){
+                const menu=e.target.getAttribute('data-menu');
+                if(menu){
+                    e.preventDefault();
+                    showMenu(menu);
+                }
+            }
+            
+            document.addEventListener('click',handleClick);
+            
+            // Fallback for direct URL access
+            document.addEventListener('DOMContentLoaded',function(){
+                const params=new URLSearchParams(window.location.search);
+                const menu=params.get('menu');
+                if(menu && pdfs[menu]){
+                    showMenu(menu);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
