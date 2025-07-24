@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
     <title>Restaurante Mareal</title>
-    <link rel="prefetch" href="tapas.pdf">
-    <link rel="prefetch" href="platos.pdf">
+    <link rel="prefetch" href="tapas.pdf" as="fetch" type="application/pdf">
+    <link rel="prefetch" href="platos.pdf" as="fetch" type="application/pdf">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:"Segoe UI",Roboto,sans-serif;overflow-x:hidden;background:#7FCCC7;color:#0D5E86;-webkit-text-size-adjust:100%}
@@ -20,10 +20,8 @@
         .top-bar{height:58px;width:100%;background:linear-gradient(90deg,#0D5E86,#009FB0);display:flex;align-items:center;justify-content:center;gap:1rem;padding:0.5rem;position:sticky;top:0;z-index:100;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
         .bar-btn{padding:0.5rem 1.5rem;border:none;border-radius:20px;font-size:1rem;font-weight:bold;background:#FFF;color:#0D5E86;text-decoration:none;transition:all 0.3s ease;touch-action:manipulation;cursor:pointer;white-space:nowrap}
         .bar-btn:hover,.bar-btn.active{background:#FF725E;color:#FFF}
-        #frameWrap{overflow:hidden;width:100vw;height:calc(100dvh - 58px - env(safe-area-inset-bottom));height:calc(100svh - 58px - env(safe-area-inset-bottom))}
-        .pdf-frame{width:100%;height:100%;border:0;loading:eager}
-        .pdf-frame iframe{width:100%;height:100%}
-        #sidebarContainer,#toolbarContainer,#secondaryToolbar,#viewerContainer .toolbar{display:none!important}
+        #frameWrap{overflow:hidden;width:100dvw;height:calc(100dvh - 58px - env(safe-area-inset-bottom));height:calc(100svh - 58px - env(safe-area-inset-bottom))}
+        #menuFrame{width:100%;height:100%;border:0}
         @media(min-width:680px){
             .hero-buttons,.top-bar{flex-direction:row;justify-content:center}
             .hero-buttons{max-width:600px}
@@ -50,37 +48,34 @@
             <a href="?menu=platos" class="bar-btn" data-menu="platos" id="platosBtn" role="button" aria-label="Ver carta de platos">Platos</a>
         </nav>
         <div id="frameWrap">
-            <iframe id="pdfFrame" class="pdf-frame" title="Carta del restaurante"></iframe>
+            <iframe id="menuFrame" width="100%" height="100%" frameborder="0" loading="eager" allowfullscreen title="Carta del restaurante"></iframe>
         </div>
     </section>
 
     <script>
         (function(){
+            const files={tapas:'tapas.pdf',platos:'platos.pdf'};
             const hero=document.getElementById('heroSection');
             const viewer=document.getElementById('viewerSection');
-            const frame=document.getElementById('pdfFrame');
+            const frame=document.getElementById('menuFrame');
             const tapasBtn=document.getElementById('tapasBtn');
             const platosBtn=document.getElementById('platosBtn');
             
-            const pdfs={
-                tapas:'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent('tapas.pdf') + '#zoom=page-width&pagemode=none',
-                platos:'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent('platos.pdf') + '#zoom=page-width&pagemode=none'
-            };
-            
             function showMenu(type){
-                if(!pdfs[type])return;
+                if(!files[type])return;
                 hero.style.display='none';
                 viewer.classList.add('active');
-                frame.src=pdfs[type];
+                frame.src=files[type]+'#view=FitH';
                 tapasBtn.classList.toggle('active',type==='tapas');
                 platosBtn.classList.toggle('active',type==='platos');
                 history.replaceState(null,'','?menu='+type);
             }
             
             function handleClick(e){
-                const menu=e.target.getAttribute('data-menu');
-                if(menu){
+                const link=e.target.closest('[data-menu]');
+                if(link){
                     e.preventDefault();
+                    const menu=link.getAttribute('data-menu');
                     showMenu(menu);
                 }
             }
@@ -90,7 +85,7 @@
             document.addEventListener('DOMContentLoaded',function(){
                 const params=new URLSearchParams(window.location.search);
                 const menu=params.get('menu');
-                if(menu && pdfs[menu]){
+                if(menu && files[menu]){
                     showMenu(menu);
                 }
             });
